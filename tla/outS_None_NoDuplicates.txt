@@ -1,0 +1,74 @@
+TLC2 Version 2026.11.03.180953 (rev: 309e489)
+Warning: Please run the Java VM, which executes TLC with a throughput optimized garbage collector, by passing the "-XX:+UseParallelGC" property.
+(Use the -nowarning option to disable this warning.)
+Running breadth-first search Model-Checking with fp 0 and seed 3990958481076477916 with 2 workers on 12 cores with 1024MB heap and 64MB offheap memory [pid: 2203] (Mac OS X 27.2 aarch64, Homebrew 21.0.11 64bit, MSBDiskFPSet, DiskStateQueue).
+Parsing file <repo>/tla/CamelIcebergSource.tla
+Parsing file /private/var/folders/3q/7yl2z5xd0gjft7y48_t4cw2h0000gn/T/tlc-12696386396643431421/Naturals.tla (jar:file:<local>)
+Parsing file /private/var/folders/3q/7yl2z5xd0gjft7y48_t4cw2h0000gn/T/tlc-12696386396643431421/FiniteSets.tla (jar:file:<local>)
+Parsing file /private/var/folders/3q/7yl2z5xd0gjft7y48_t4cw2h0000gn/T/tlc-12696386396643431421/_TLCTrace.tla (jar:file:<local>)
+Parsing file /private/var/folders/3q/7yl2z5xd0gjft7y48_t4cw2h0000gn/T/tlc-12696386396643431421/Sequences.tla (jar:file:<local>)
+Parsing file /private/var/folders/3q/7yl2z5xd0gjft7y48_t4cw2h0000gn/T/tlc-12696386396643431421/TLC.tla (jar:file:<local>)
+Parsing file /private/var/folders/3q/7yl2z5xd0gjft7y48_t4cw2h0000gn/T/tlc-12696386396643431421/TLCExt.tla (jar:file:<local>)
+Parsing file /private/var/folders/3q/7yl2z5xd0gjft7y48_t4cw2h0000gn/T/tlc-12696386396643431421/Integers.tla (jar:file:<local>)
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module Integers
+Semantic processing of module TLCExt
+Semantic processing of module _TLCTrace
+Semantic processing of module CamelIcebergSource
+Linting of module TLCExt
+Linting of module _TLCTrace
+Linting of module CamelIcebergSource
+Starting... (2026-11-08 06:35:59)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-11-08 06:35:59.
+Error: Invariant NoDuplicates is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ deliveries = (m1 :> 0 @@ m2 :> 0)
+/\ table = (m1 :> 0 @@ m2 :> 0)
+/\ marks = {}
+/\ pc = (m1 :> "queued" @@ m2 :> "queued")
+/\ exch = (m1 :> 0 @@ m2 :> 0)
+
+State 2: <Deliver(m1) line 41, col 3 to line 46, col 31 of module CamelIcebergSource>
+/\ deliveries = (m1 :> 1 @@ m2 :> 0)
+/\ table = (m1 :> 0 @@ m2 :> 0)
+/\ marks = {}
+/\ pc = (m1 :> "inflight" @@ m2 :> "queued")
+/\ exch = (m1 :> 1 @@ m2 :> 0)
+
+State 3: <IcebergStep(m1) line 50, col 3 to line 56, col 35 of module CamelIcebergSource>
+/\ deliveries = (m1 :> 1 @@ m2 :> 0)
+/\ table = (m1 :> 1 @@ m2 :> 0)
+/\ marks = {<<m1, 1>>}
+/\ pc = (m1 :> "committed" @@ m2 :> "queued")
+/\ exch = (m1 :> 1 @@ m2 :> 0)
+
+State 4: <NotAcked(m1) line 66, col 3 to line 68, col 49 of module CamelIcebergSource>
+/\ deliveries = (m1 :> 1 @@ m2 :> 0)
+/\ table = (m1 :> 1 @@ m2 :> 0)
+/\ marks = {<<m1, 1>>}
+/\ pc = (m1 :> "queued" @@ m2 :> "queued")
+/\ exch = (m1 :> 1 @@ m2 :> 0)
+
+State 5: <Deliver(m1) line 41, col 3 to line 46, col 31 of module CamelIcebergSource>
+/\ deliveries = (m1 :> 2 @@ m2 :> 0)
+/\ table = (m1 :> 1 @@ m2 :> 0)
+/\ marks = {<<m1, 1>>}
+/\ pc = (m1 :> "inflight" @@ m2 :> "queued")
+/\ exch = (m1 :> 2 @@ m2 :> 0)
+
+State 6: <IcebergStep(m1) line 50, col 3 to line 56, col 35 of module CamelIcebergSource>
+/\ deliveries = (m1 :> 2 @@ m2 :> 0)
+/\ table = (m1 :> 2 @@ m2 :> 0)
+/\ marks = {<<m1, 1>>, <<m1, 2>>}
+/\ pc = (m1 :> "committed" @@ m2 :> "queued")
+/\ exch = (m1 :> 2 @@ m2 :> 0)
+
+40 states generated, 27 distinct states found, 6 states left on queue.
+The depth of the complete state graph search is 6.
+Finished in 00s at (2026-11-08 06:35:59)
+Trace exploration spec path: ./CamelIcebergSource_TTrace_1794099959.tla

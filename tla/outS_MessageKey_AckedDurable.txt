@@ -1,0 +1,34 @@
+TLC2 Version 2026.11.03.180953 (rev: 309e489)
+Warning: Please run the Java VM, which executes TLC with a throughput optimized garbage collector, by passing the "-XX:+UseParallelGC" property.
+(Use the -nowarning option to disable this warning.)
+Running breadth-first search Model-Checking with fp 80 and seed -5721906700615759400 with 2 workers on 12 cores with 1024MB heap and 64MB offheap memory [pid: 2276] (Mac OS X 27.2 aarch64, Homebrew 21.0.11 64bit, MSBDiskFPSet, DiskStateQueue).
+Parsing file <repo>/tla/CamelIcebergSource.tla
+Parsing file /private/var/folders/3q/7yl2z5xd0gjft7y48_t4cw2h0000gn/T/tlc-4254415711008686644/Naturals.tla (jar:file:<local>)
+Parsing file /private/var/folders/3q/7yl2z5xd0gjft7y48_t4cw2h0000gn/T/tlc-4254415711008686644/FiniteSets.tla (jar:file:<local>)
+Parsing file /private/var/folders/3q/7yl2z5xd0gjft7y48_t4cw2h0000gn/T/tlc-4254415711008686644/_TLCTrace.tla (jar:file:<local>)
+Parsing file /private/var/folders/3q/7yl2z5xd0gjft7y48_t4cw2h0000gn/T/tlc-4254415711008686644/Sequences.tla (jar:file:<local>)
+Parsing file /private/var/folders/3q/7yl2z5xd0gjft7y48_t4cw2h0000gn/T/tlc-4254415711008686644/TLC.tla (jar:file:<local>)
+Parsing file /private/var/folders/3q/7yl2z5xd0gjft7y48_t4cw2h0000gn/T/tlc-4254415711008686644/TLCExt.tla (jar:file:<local>)
+Parsing file /private/var/folders/3q/7yl2z5xd0gjft7y48_t4cw2h0000gn/T/tlc-4254415711008686644/Integers.tla (jar:file:<local>)
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module Integers
+Semantic processing of module TLCExt
+Semantic processing of module _TLCTrace
+Semantic processing of module CamelIcebergSource
+Linting of module TLCExt
+Linting of module _TLCTrace
+Linting of module CamelIcebergSource
+Starting... (2026-11-08 06:36:00)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-11-08 06:36:01.
+Model checking completed. No error has been found.
+  Estimates of the probability that TLC did not check all reachable states
+  because two distinct states had the same fingerprint:
+  calculated (optimistic):  val = 1.3E-15
+313 states generated, 169 distinct states found, 0 states left on queue.
+The depth of the complete state graph search is 19.
+The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 4 and the 95th percentile is 3).
+Finished in 00s at (2026-11-08 06:36:01)

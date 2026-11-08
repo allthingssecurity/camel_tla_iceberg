@@ -1,0 +1,20 @@
+######## Iceberg 1.5.2
+  BUG  variant=close scenario=later: file consumed=true, deliveries in this JVM=2 (exchange ids [CBD7FC71CCC5D16-0000000000000000, CBD7FC71CCC5D16-0000000000000001]), snapshots=2, rows=[1:a, 1:a, 2:b, 2:b]
+  committed to Iceberg; halting the JVM before the file is acknowledged
+  BUG  variant=close scenario=crash2: file consumed=true, deliveries in this JVM=1 (exchange ids [07094D2AA73F3BC-0000000000000000]), snapshots=2, rows=[1:a, 1:a, 2:b, 2:b]
+  BUG  variant=fixed scenario=later: file consumed=true, deliveries in this JVM=2 (exchange ids [F43581E6341AEB2-0000000000000000, F43581E6341AEB2-0000000000000001]), snapshots=2, rows=[1:a, 1:a, 2:b, 2:b]
+  committed to Iceberg; halting the JVM before the file is acknowledged
+  BUG  variant=fixed scenario=crash2: file consumed=true, deliveries in this JVM=1 (exchange ids [BFC10ADCEF69618-0000000000000000]), snapshots=2, rows=[1:a, 1:a, 2:b, 2:b]
+  ok   variant=keyed scenario=later: file consumed=true, deliveries in this JVM=2 (exchange ids [D0A69BA174E02DB-0000000000000000, D0A69BA174E02DB-0000000000000001]), snapshots=1, rows=[1:a, 2:b]
+  committed to Iceberg; halting the JVM before the file is acknowledged
+  ok   variant=keyed scenario=crash2: file consumed=true, deliveries in this JVM=1 (exchange ids [A534B651F6E7539-0000000000000000]), snapshots=1, rows=[1:a, 2:b]
+######## Iceberg 1.6.0
+  BUG  variant=close scenario=later: file consumed=true, deliveries in this JVM=2 (exchange ids [AA538132245A2CE-0000000000000000, AA538132245A2CE-0000000000000001]), snapshots=2, rows=[1:a, 1:a, 2:b, 2:b]
+  committed to Iceberg; halting the JVM before the file is acknowledged
+  BUG  variant=close scenario=crash2: file consumed=true, deliveries in this JVM=1 (exchange ids [030E65B4FCEE800-0000000000000000]), snapshots=2, rows=[1:a, 1:a, 2:b, 2:b]
+  BUG  variant=fixed scenario=later: file consumed=true, deliveries in this JVM=2 (exchange ids [9717EB13EBBA424-0000000000000000, 9717EB13EBBA424-0000000000000001]), snapshots=2, rows=[1:a, 1:a, 2:b, 2:b]
+  committed to Iceberg; halting the JVM before the file is acknowledged
+  BUG  variant=fixed scenario=crash2: file consumed=true, deliveries in this JVM=1 (exchange ids [1E7B5EC81309349-0000000000000000]), snapshots=2, rows=[1:a, 1:a, 2:b, 2:b]
+  ok   variant=keyed scenario=later: file consumed=true, deliveries in this JVM=2 (exchange ids [D6A4A1F3879C54D-0000000000000000, D6A4A1F3879C54D-0000000000000001]), snapshots=1, rows=[1:a, 2:b]
+  committed to Iceberg; halting the JVM before the file is acknowledged
+  ok   variant=keyed scenario=crash2: file consumed=true, deliveries in this JVM=1 (exchange ids [B146B6B409A54C3-0000000000000000]), snapshots=1, rows=[1:a, 2:b]

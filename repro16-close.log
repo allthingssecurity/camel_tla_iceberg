@@ -1,0 +1,9 @@
+variant=close  producer class from file:<repo>/h16/close/
+[L1] one row of two has a wrong type (id is "abc" for an int column)
+  BUG       bad row: exchange succeeds and the table ends up wrong or unreadable -- exchange succeeded; snapshots=1; reading the table now fails: org.apache.parquet.io.ParquetDecodingException: Can't read value in column [id] required int32 id = 1 at value 1 out of 1 in current page. repetition leve
+[L2] the commit is applied but the reply is lost once; Camel redelivers once
+  BUG       redelivery appends the rows a second time -- exchange succeeded; rows in table=[1:a, 1:a, 2:b, 2:b]
+[L3] 3 messages: catalogs built vs closed
+  BUG       a new catalog per message, never closed -- catalogs created for 3 messages=3 closed=0
+[L4] partitioned table (identity(name)), rows a and b
+  ok        partitioned table: rows committed without partition values -- exchange failed: java.lang.IllegalArgumentException: Partition must not be null when creating data writer for partitioned spec

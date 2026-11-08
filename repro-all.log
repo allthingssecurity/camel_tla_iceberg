@@ -1,0 +1,108 @@
+== TLC: producer model (tla/CamelIcebergSink.tla)
+   AsIs       AckedDurable          Invariant AckedDurable is violated
+   AsIs       NoDuplicates          holds
+   AsIs       CatalogsBounded       holds
+   AsIs       NothingEverCommitted  holds
+   Wired      AckedDurable          holds
+   Wired      NoDuplicates          holds
+   Wired      CatalogsBounded       Invariant CatalogsBounded is violated
+   Wired      NothingEverCommitted  holds
+   WiredClose AckedDurable          Invariant AckedDurable is violated
+   WiredClose NoDuplicates          Invariant NoDuplicates is violated
+   WiredClose CatalogsBounded       Invariant CatalogsBounded is violated
+   WiredClose NothingEverCommitted  Invariant NothingEverCommitted is violated
+   Fixed      AckedDurable          holds
+   Fixed      NoDuplicates          holds
+   Fixed      CatalogsBounded       holds
+   Fixed      NothingEverCommitted  Invariant NothingEverCommitted is violated
+== TLC: source-redelivery model (tla/CamelIcebergSource.tla)
+   None       NoDuplicates          Invariant NoDuplicates is violated
+   None       AckedDurable          holds
+   ExchangeId NoDuplicates          Invariant NoDuplicates is violated
+   ExchangeId AckedDurable          holds
+   MessageKey NoDuplicates          holds
+   MessageKey AckedDurable          holds
+== Real code, Iceberg 1.5.2, Camel 4.4.2
+  -- producer: orig
+[C1] configuring the component's catalog the Camel way
+  BUG       component property 'catalog' cannot be set (no setter) -- PropertyBindingException: Error binding property (catalog=Harness$NonNullIcebergCatalog@53ca01a2) with name: catalog on bean: org.apache.iceberg.camel.IcebergComponent@14ec4505 with value: H
+[C2] IcebergCatalog.catalog() (the class as written) under every way to choose the catalog
+      type=hadoop (all other fields set): java.lang.NullPointerException: null value in entry: catalog-impl=null
+      implementation=HadoopCatalog (all other fields set): java.lang.NullPointerException: null value in entry: type=null
+      type=hadoop + implementation=HadoopCatalog (all other fields set): java.lang.IllegalArgumentException: Cannot create catalog test, both type and catalog-impl are set: type=hadoop, catalog-impl=org.apache.iceberg.hadoop.HadoopCatalog
+  BUG       catalog() fails for every configuration -- 3/3 failed
+[P1] send 2 rows through the producer as written (control: none needed, the table must gain 2 rows)
+  BUG       message reported success but nothing written -- exchange succeeded; snapshots=0; rows=[]
+[P2] send without the ICEBERG_TABLE header
+  BUG       missing header gives NullPointerException instead of a clear error -- exchange failed: java.lang.NullPointerException: Cannot invoke "String.isEmpty()" because "<local2>" is null
+[P3] call the (unwired) write() as written, 3 times, as redeliveries would
+  BUG       write() can never commit (toDataFile on an unclosed writer) -- java.lang.IllegalStateException: Cannot create data file from unclosed writer
+  ok        each failed attempt leaves an orphan data file -- 0 data files on disk, 0 in the table
+  BUG       a new catalog per call, never closed -- created=3 closed=0
+  -- producer: close
+[L1] one row of two has a wrong type (id is "abc" for an int column)
+  BUG       bad row: exchange succeeds and the table ends up wrong or unreadable -- exchange succeeded; snapshots=1; reading the table now fails: org.apache.parquet.io.ParquetDecodingException: Can't read value in column [id] required int32 id = 1 at value 1 o
+[L2] the commit is applied but the reply is lost once; Camel redelivers once
+  BUG       redelivery appends the rows a second time -- exchange succeeded; rows in table=[1:a, 1:a, 2:b, 2:b]
+[L3] 3 messages: catalogs built vs closed
+  BUG       a new catalog per message, never closed -- catalogs created for 3 messages=3 closed=0
+[L4] partitioned table (identity(name)), rows a and b
+  ok        partitioned table: rows committed without partition values -- exchange failed: java.lang.IllegalArgumentException: Partition must not be null when creating data writer for partitioned spec
+  -- producer: fixed
+[L1] one row of two has a wrong type (id is "abc" for an int column)
+  ok        bad row: exchange succeeds and the table ends up wrong or unreadable -- exchange failed: java.lang.ClassCastException: class java.lang.String cannot be cast to class java.lang.Integer (java.lang.String and java.lang.Integer are in module java.base 
+[L2] the commit is applied but the reply is lost once; Camel redelivers once
+  ok        redelivery appends the rows a second time -- exchange succeeded; rows in table=[1:a, 2:b]
+[L3] 3 messages: catalogs built vs closed
+  ok        a new catalog per message, never closed -- catalogs created for 3 messages=0 closed=0
+[L4] partitioned table (identity(name)), rows a and b
+  ok        partitioned table: rows committed without partition values -- exchange failed: java.lang.UnsupportedOperationException: partitioned tables are not supported yet
+  -- source redelivery (real file consumer)
+  BUG  variant=close scenario=later: file consumed=true, deliveries in this JVM=2 (exchange ids [BC78C84B0B84543-0000000000000000, BC78C84B0B84543-0000000000000001]), snapshots=2, rows=[1:a, 1:a, 2:b, 2:b]
+  BUG  variant=close scenario=crash2: file consumed=true, deliveries in this JVM=1 (exchange ids [AA7E44F33490BEE-0000000000000000]), snapshots=2, rows=[1:a, 1:a, 2:b, 2:b]
+  BUG  variant=fixed scenario=later: file consumed=true, deliveries in this JVM=2 (exchange ids [699C09C8C870427-0000000000000000, 699C09C8C870427-0000000000000001]), snapshots=2, rows=[1:a, 1:a, 2:b, 2:b]
+  BUG  variant=fixed scenario=crash2: file consumed=true, deliveries in this JVM=1 (exchange ids [EFEC8A15C61495A-0000000000000000]), snapshots=2, rows=[1:a, 1:a, 2:b, 2:b]
+  ok   variant=keyed scenario=later: file consumed=true, deliveries in this JVM=2 (exchange ids [AD6D02EC506A0AE-0000000000000000, AD6D02EC506A0AE-0000000000000001]), snapshots=1, rows=[1:a, 2:b]
+  ok   variant=keyed scenario=crash2: file consumed=true, deliveries in this JVM=1 (exchange ids [17055DA712B3981-0000000000000000]), snapshots=1, rows=[1:a, 2:b]
+== Real code, Iceberg 1.6.0, Camel 4.4.2
+  -- producer: orig
+[C1] configuring the component's catalog the Camel way
+  BUG       component property 'catalog' cannot be set (no setter) -- PropertyBindingException: Error binding property (catalog=Harness$NonNullIcebergCatalog@3ee0fea4) with name: catalog on bean: org.apache.iceberg.camel.IcebergComponent@358c99f5 with value: H
+[C2] IcebergCatalog.catalog() (the class as written) under every way to choose the catalog
+      type=hadoop (all other fields set): java.lang.NullPointerException: null value in entry: catalog-impl=null
+      implementation=HadoopCatalog (all other fields set): java.lang.NullPointerException: null value in entry: type=null
+      type=hadoop + implementation=HadoopCatalog (all other fields set): java.lang.IllegalArgumentException: Cannot create catalog test, both type and catalog-impl are set: type=hadoop, catalog-impl=org.apache.iceberg.hadoop.HadoopCatalog
+  BUG       catalog() fails for every configuration -- 3/3 failed
+[P1] send 2 rows through the producer as written (control: none needed, the table must gain 2 rows)
+  BUG       message reported success but nothing written -- exchange succeeded; snapshots=0; rows=[]
+[P2] send without the ICEBERG_TABLE header
+  BUG       missing header gives NullPointerException instead of a clear error -- exchange failed: java.lang.NullPointerException: Cannot invoke "String.isEmpty()" because "<local2>" is null
+[P3] call the (unwired) write() as written, 3 times, as redeliveries would
+  BUG       write() can never commit (toDataFile on an unclosed writer) -- java.lang.IllegalStateException: Cannot create data file from unclosed writer
+  ok        each failed attempt leaves an orphan data file -- 0 data files on disk, 0 in the table
+  BUG       a new catalog per call, never closed -- created=3 closed=0
+  -- producer: close
+[L1] one row of two has a wrong type (id is "abc" for an int column)
+  BUG       bad row: exchange succeeds and the table ends up wrong or unreadable -- exchange succeeded; snapshots=1; reading the table now fails: org.apache.parquet.io.ParquetDecodingException: Can't read value in column [id] required int32 id = 1 at value 1 o
+[L2] the commit is applied but the reply is lost once; Camel redelivers once
+  BUG       redelivery appends the rows a second time -- exchange succeeded; rows in table=[1:a, 1:a, 2:b, 2:b]
+[L3] 3 messages: catalogs built vs closed
+  BUG       a new catalog per message, never closed -- catalogs created for 3 messages=3 closed=0
+[L4] partitioned table (identity(name)), rows a and b
+  ok        partitioned table: rows committed without partition values -- exchange failed: java.lang.IllegalArgumentException: Partition must not be null when creating data writer for partitioned spec
+  -- producer: fixed
+[L1] one row of two has a wrong type (id is "abc" for an int column)
+  ok        bad row: exchange succeeds and the table ends up wrong or unreadable -- exchange failed: java.lang.ClassCastException: class java.lang.String cannot be cast to class java.lang.Integer (java.lang.String and java.lang.Integer are in module java.base 
+[L2] the commit is applied but the reply is lost once; Camel redelivers once
+  ok        redelivery appends the rows a second time -- exchange succeeded; rows in table=[1:a, 2:b]
+[L3] 3 messages: catalogs built vs closed
+  ok        a new catalog per message, never closed -- catalogs created for 3 messages=0 closed=0
+[L4] partitioned table (identity(name)), rows a and b
+  ok        partitioned table: rows committed without partition values -- exchange failed: java.lang.UnsupportedOperationException: partitioned tables are not supported yet
+  -- source redelivery (real file consumer)
+  BUG  variant=close scenario=later: file consumed=true, deliveries in this JVM=2 (exchange ids [BC39C2D1D3CF878-0000000000000000, BC39C2D1D3CF878-0000000000000001]), snapshots=2, rows=[1:a, 1:a, 2:b, 2:b]
+  BUG  variant=close scenario=crash2: file consumed=true, deliveries in this JVM=1 (exchange ids [6B0ED59D52C74FE-0000000000000000]), snapshots=2, rows=[1:a, 1:a, 2:b, 2:b]
+  BUG  variant=fixed scenario=later: file consumed=true, deliveries in this JVM=2 (exchange ids [7092574FF9AB48C-0000000000000000, 7092574FF9AB48C-0000000000000001]), snapshots=2, rows=[1:a, 1:a, 2:b, 2:b]
+  BUG  variant=fixed scenario=crash2: file consumed=true, deliveries in this JVM=1 (exchange ids [6D9BB70AAD5E4BF-0000000000000000]), snapshots=2, rows=[1:a, 1:a, 2:b, 2:b]
+  ok   variant=keyed scenario=later: file consumed=true, deliveries in this JVM=2 (exchange ids [719EF72EC84210E-0000000000000000, 719EF72EC84210E-0000000000000001]), snapshots=1, rows=[1:a, 2:b]
+  ok   variant=keyed scenario=crash2: file consumed=true, deliveries in this JVM=1 (exchange ids [ED3C6A828699F7C-0000000000000000]), snapshots=1, rows=[1:a, 2:b]
